@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <!-- css stylesheets go here -->
+  </head>
+
+  <body>
+    <h1>{{ group_name }}</h1>
+
+    <table>
+      <tr>
+        <th><b>Giver</b></th>
+        <th><b>Receiver</b></th>
+      </tr>
+      {% for pair in pairs %}
+        <tr>
+          <td>{{ pair.giver }}</td>
+          <td>{{ pair.receiver }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
