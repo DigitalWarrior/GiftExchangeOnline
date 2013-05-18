@@ -1,42 +1,49 @@
 #!/usr/bin/env python
 
 import sys
+import string
 import os
 import urllib
+import time
 import webapp2
 import datetime
 import jinja2
 from single_selector import ChristmasNamesSelector # as name_selector
 from single_selector import GiverReceiverPair
-from google.appengine.ext import db
-from constants import address_list, address_list_test, DEBUG, last_name
+from google.appengine.ext import ndb
+from constants import DEBUG, last_name
 
-glob_counter = 0 #take this out once have a more sophisticated way of setting parent
 JINJA_ENVIRONMENT = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
+        loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+        extensions=['jinja2.ext.autoescape'])
+DEBUG = True
 
-class GiverReceiver(db.Model):
+class GiverReceiver(ndb.Model):
     '''Models an individual giver:receiver pair entry to the db'''
-    giver = db.StringProperty()
-    receiver = db.StringProperty()  # note: single receiver (for now)
+    giver = ndb.StringProperty()
+    receiver = ndb.StringProperty()  # note: single receiver (for now)
+    group = ndb.StringProperty()
 
-def group_key(group_name=None):
+'''def group_key(group_name=None):
     """Constructs a Datastore key for a Group entity with group_name"""
-    return db.Key.from_path("Group", group_name or "default")
-#default? or force a name?
+    return ndb.Key("Group", group_name or "default")
+'''
 
 class EntryPage(webapp2.RequestHandler):
 
     def get(self):
-        global glob_counter
+        possible = string.lowercase + string.digits
 #starting page - a form to enter names
-        group_name = glob_counter
-        glob_counter += 1
-
+        my_id = ndb.Key(GiverReceiver, 1)
+        F, _ = GiverReceiver.allocate_ids(1)
+        group_name = str(F)
+        if DEBUG:
+            print 'group name from EntryPage is', group_name
+            print 'type of group name is',type(group_name)
         template_values = {
                 'group_name': group_name,
+                'query_params': urllib.urlencode({'group_name':group_name.encode('utf8')}),
         }
-
         template = JINJA_ENVIRONMENT.get_template('templates/index.html')
         self.response.write(template.render(template_values))
 
@@ -44,16 +51,18 @@ class EntryPage(webapp2.RequestHandler):
 class Results(webapp2.RequestHandler):
 
     def post(self):
-        print 'made it to Results'
+        if DEBUG: print 'made it to Results'
         group_name = self.request.get('group_name')
-        print 'group name is ', group_name
+        if DEBUG: print 'group name is ', group_name
         name_list = []
         for i in range(1,11):
-            print self.request.get(str(i))
-            name_list.append(self.request.get(str(i)))
+            if self.request.get("name"+str(i)) is not u'':
+                if DEBUG: print(self.request.get("name"+str(i)))
+                name_list.append(self.request.get("name"+str(i)))
+            else:
+                if DEBUG: print 'entered value is None'
 #there has to be a better way to get a list of items from a web form
 
-        #name_list = address_list.keys()  #get these from webpage
         name_selector = ChristmasNamesSelector(name_list, 1)
         matches = name_selector.pair_names()
         name_selector.print_pairs(matches)
@@ -62,16 +71,14 @@ class Results(webapp2.RequestHandler):
         #this creates the object and sets its ancestor
         for match in matches:
             for r in match.receiver:
-                pair = GiverReceiver(parent=group_key(group_name))
-                pair.giver = match.giver
-                pair.receiver = r
-#probably a better way to do the above -- can the GR's be the same class?
+                pair = GiverReceiver(giver=match.giver,
+                                     receiver=r.encode('utf8'),
+                                     group=group_name)
                 pair.put()
+        time.sleep(.4)
 
         query_params = {'group_name': group_name}
-        self.redirect('/display')#?' + urllib.urlencode(query_params))#?' + urllib.urlencode(query_params))
-    #for each pair in matches, create a new database entry with the
-    # same ancestor. Then can pull these out to populate the page(?)
+        self.redirect('/display?' + urllib.urlencode(query_params))
 
 #TODO: email
 
@@ -80,14 +87,8 @@ class Display(webapp2.RequestHandler):
 
     def get(self):
         group_name = self.request.get('group_name')
-        print 'group_name from display is', group_name
-#need to assign a group name but not have user define it (unless they
-# want to?) to keep giver/receivers together in the same entity.
-#Can provide this group name (or a hashed version?) back to the
-# user for re-lookup if they lose results? Maybe worry about this 
-# part later
-        pairs_query = GiverReceiver.all().ancestor(
-                group_key(group_name))
+        if DEBUG: print 'group_name from display is', group_name
+        pairs_query = GiverReceiver.query(GiverReceiver.group == group_name)
         pairs = pairs_query.fetch(10)
 #if add a login section, could have items grouped by parent as 
 # person logged in and session/group

@@ -1,22 +1,26 @@
 <html>
   <head>
-    <!-- css stylesheets go here -->
+    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
   </head>
 
   <body>
-      <form action="/assigned?{{ group_name }}" method="post">
-          List of Names: <br>
-      <input name="1" type="text"><br>
-      <input name="2" type="text"><br>
-      <input name="3" type="text"><br>
-      <input name="4" type="text"><br>
-      <input name="5" type="text"><br>
-      <input name="6" type="text"><br>
-      <input name="7" type="text"><br>
-      <input name="8" type="text"><br>
-      <input name="9" type="text"><br>
-      <input name="10" type="text"><br>
-      <input type="submit" value="Submit">
-    </form>
+    <h1>Secret-Santa Style Name Selector</h1>
+    <h2>Type at least 3 and up to 10 names and email addresses. Each person will be randomly assigned one other person to buy a gift for. This will soon be updated with an option to send an email to each person with the name of the person they should buy a gift for.</h2>
+    <p id="input_form">
+      <form action="/assigned?{{ query_params }}" method="post">
+              List of Names and Email Addresses: <br>
+        1. <input name="name1" type="text" placeholder="Name" required>&nbsp;&nbsp;<input name="email1" type="email" placeholder="Email" required><br>
+        2. <input name="name2" type="text" placeholder="Name" required>&nbsp;&nbsp;<input name="email2" type="email" placeholder="Email" required><br>
+        3. <input name="name3" type="text" placeholder="Name" required>&nbsp;&nbsp;<input name="email3" type="email" placeholder="Email" required><br>
+        4. <input name="name4" type="text" placeholder="Name">&nbsp;&nbsp;<input name="email4" type="email" placeholder="Email"><br>
+        5. <input name="name5" type="text" placeholder="Name">&nbsp;&nbsp;<input name="email5" type="email" placeholder="Email"><br>
+        6. <input name="name6" type="text" placeholder="Name">&nbsp;&nbsp;<input name="email6" type="email" placeholder="Email"><br>
+        7. <input name="name7" type="text" placeholder="Name">&nbsp;&nbsp;<input name="email7" type="email" placeholder="Email"><br>
+        8. <input name="name8" type="text" placeholder="Name">&nbsp;&nbsp;<input name="email8" type="email" placeholder="Email"><br>
+        9. <input name="name9" type="text" placeholder="Name">&nbsp;&nbsp;<input name="email9" type="email" placeholder="Email"><br>
+        10. <input name="name10" type="text" placeholder="Name">&nbsp;&nbsp;<input name="email10" type="email" placeholder="Email"><br>
+        <input type="submit" value="Submit">
+      </form>
+    </p>
   </body>
 </html>

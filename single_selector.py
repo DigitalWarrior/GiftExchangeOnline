@@ -6,7 +6,7 @@
 
 import random
 from google.appengine.ext import db
-from constants import exclude, preferences, DEBUG
+from constants import DEBUG
 
 class GiverReceiverPair(object):
     '''Class to hold a pair of giver and receiver.
