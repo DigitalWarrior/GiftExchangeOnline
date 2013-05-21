@@ -10,11 +10,13 @@
       <tr>
         <th><b>Giver</b></th>
         <th><b>Receiver</b></th>
+        <th><b>Giver's Email</b></th>
       </tr>
       {% for pair in pairs %}
         <tr>
           <td>{{ pair.giver }}</td>
           <td>{{ pair.receiver }}</td>
+          <td>{{ pair.email }}</td>
       </tr>
       {% endfor %}
     </table>

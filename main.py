@@ -22,6 +22,7 @@ class GiverReceiver(ndb.Model):
     '''Models an individual giver:receiver pair entry to the db'''
     giver = ndb.StringProperty()
     receiver = ndb.StringProperty()  # note: single receiver (for now)
+    email = ndb.StringProperty()
     group = ndb.StringProperty()
 
 '''def group_key(group_name=None):
@@ -55,12 +56,13 @@ class Results(webapp2.RequestHandler):
         group_name = self.request.get('group_name')
         if DEBUG: print 'group name is ', group_name
         name_list = []
+        title = self.request.get("title")
         for i in range(1,11):
-            if self.request.get("name"+str(i)) is not u'':
-                if DEBUG: print(self.request.get("name"+str(i)))
-                name_list.append(self.request.get("name"+str(i)))
-            else:
-                if DEBUG: print 'entered value is None'
+            name = "name"+str(i)
+            email = "email"+str(i)
+            if self.request.get(name) is not u'':
+                if DEBUG: print(self.request.get(name), self.request.get(email))
+                name_list.append((self.request.get(name), self.request.get(email)))
 #there has to be a better way to get a list of items from a web form
 
         name_selector = ChristmasNamesSelector(name_list, 1)
@@ -73,9 +75,11 @@ class Results(webapp2.RequestHandler):
             for r in match.receiver:
                 pair = GiverReceiver(giver=match.giver,
                                      receiver=r.encode('utf8'),
+                                     email=match.giver_email,
                                      group=group_name)
                 pair.put()
-        time.sleep(.4)
+        time.sleep(.2) #give the database time to insert and show entries.
+#Surely there's a better way?
 
         query_params = {'group_name': group_name}
         self.redirect('/display?' + urllib.urlencode(query_params))
