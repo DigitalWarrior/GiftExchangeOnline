@@ -16,11 +16,9 @@ class EmailFolks(object):
         subject = "Gift Selection"
         from_address = EMAIL_USERNAME + "@gmail.com"
         to_address = giver_receiver.giver_email
-        text = ("Name selections for your gift shuffle. You (%s) are giving \
-                presents to %s; test: %s. ") % \
+        text = ("Name selections for your gift shuffle. You (%s) are giving presents to %s.") % \
                     (giver_receiver.giver,
-                    ','.join(str(r) for r in giver_receiver.receiver),
-                    giver_receiver.receiver)
+                    ','.join(str(r) for r in giver_receiver.receiver))
         if DEBUG: print to_address
         mail.send_mail(sender=from_address,
                     to=to_address,

@@ -19,15 +19,6 @@ class GiverReceiverPair(object):
     def __repr__(self):
         return self.giver + repr(self.receiver)
 
-class Person(object):
-
-    def __init__(self, name, email):
-        self.name = name
-        self.email = email
-
-    def __repr__(self):
-        print self.name, self.email
-
 
 class ChristmasNamesSelector(object):
     '''Methods associated with pairing givers and receivers randomly.
@@ -38,12 +29,6 @@ class ChristmasNamesSelector(object):
     def __init__(self, name_list, number_receivers):
         self.number_receivers = number_receivers
         self.name_list = name_list
-        '''self.name_list = []
-        self.person_list = []
-        for name, email in name_list:
-            self.name_list.append(name)
-            person_list = Person(name, email)
-        '''
 
     def _select_names(self, giver, receiver_list):
         '''Given one name (giver) and a list of receivers (all not
@@ -51,14 +36,17 @@ class ChristmasNamesSelector(object):
             a GiverReceiverPair object.  Returns said object. 
         '''
         receivers = list(receiver_list)
-        #receivers = [receiver for receiver in receiver_list]
-        print 'receivers list from _select names',repr(receivers)
+        if DEBUG: print 'receivers list from _select names',repr(receivers)
         receiver_picks = []
         for i in range(self.number_receivers):
             receiver = random.choice(receivers)
             receivers.remove(receiver)
             receiver_picks.append(receiver)
-        if (giver not in receiver_picks): #giver cannot be same as receiver
+        if DEBUG: 
+            print 'giver[0] from _select_names', giver[0]
+            print 'receiver list comparing to', repr(receiver_picks)
+        if (giver[0] not in receiver_picks): #giver cannot be same as receiver
+            if DEBUG: print 'giver[0] not in receiver_picks'
             giver_receiver_match = GiverReceiverPair(giver[0], receiver_picks, giver[1])
             return giver_receiver_match
         else:
@@ -76,10 +64,9 @@ class ChristmasNamesSelector(object):
         receiver_dict = {}
         list_of_giver_receivers = []
         for receiver in self.name_list:
-            print 'receiver[0]:',receiver[0]
             receiver_dict[receiver[0]] = 0
         for name in giver_list:
-            if ((len(receiver_dict) > self.number_receivers) or (len(receiver_dict) == self.number_receivers and name not in receiver_dict)):
+            if ((len(receiver_dict) > self.number_receivers) or (len(receiver_dict) == self.number_receivers and name[0] not in receiver_dict)):
                 print 'receiver_dict',repr(receiver_dict)
                 print 'reciver_dict.keys()', receiver_dict.keys()
                 giver_receiver = self._select_names(name, receiver_dict.keys())
