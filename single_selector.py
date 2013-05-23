@@ -5,8 +5,7 @@
 # Christmas name selector
 
 import random
-#from google.appengine.ext import db
-from constants import DEBUG
+from emailer import DEBUG
 
 class GiverReceiverPair(object):
     '''Class to hold a pair of giver and receiver.

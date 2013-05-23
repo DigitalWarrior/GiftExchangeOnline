@@ -7,10 +7,8 @@ import time
 import webapp2
 import jinja2
 from google.appengine.ext import ndb
-from constants import DEBUG, email_username
-from emailer import EmailFolks
-from single_selector import ChristmasNamesSelector # as name_selector
-from single_selector import GiverReceiverPair
+from emailer import EmailFolks, EMAIL_USERNAME, DEBUG
+from single_selector import ChristmasNamesSelector
 
 JINJA_ENVIRONMENT = jinja2.Environment(
         loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -75,7 +73,7 @@ class Thanks(webapp2.RequestHandler):
 
     def get(self):
         template_values = {
-                'email': email_username + "@gmail.com",
+                'email': EMAIL_USERNAME + "@gmail.com",
         }
         template = JINJA_ENVIRONMENT.get_template('templates/thanks.html')
         self.response.write(template.render(template_values))
