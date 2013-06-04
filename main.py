@@ -89,7 +89,7 @@ class EntryPage(webapp2.RequestHandler):
             errors += "No duplicate names allowed.\n\n"
         for x in name_list:
             if x[1] == u'':
-                errors += "Every name must have an associated email.\n\n"
+                errors += "Every name must have an associated email address.\n\n"
             else:
                 if not email_regex.match(x[1]):
                     errors += "Please enter a valid email. You entered %s.\n" % (x[1])
@@ -112,4 +112,4 @@ class Thanks(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([('/', EntryPage),
                                 ('/thanks', Thanks)],
-                                debug=True)
+                                debug=False)
