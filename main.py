@@ -1,5 +1,6 @@
 #!/usr/bin/env python 
 import sys
+import re
 import string
 import os
 import urllib
@@ -25,6 +26,10 @@ class GiverReceiver(ndb.Model):
 
 class EntryPage(webapp2.RequestHandler):
 
+    def write_form(self, template_values):
+        template = JINJA_ENVIRONMENT.get_template('templates/index.html')
+        self.response.out.write(template.render(template_values))
+
     def get(self):
         possible = string.lowercase + string.digits
         my_id = ndb.Key(GiverReceiver, 1)
@@ -34,19 +39,13 @@ class EntryPage(webapp2.RequestHandler):
             print 'group name from EntryPage is', group_name
             print 'type of group name is',type(group_name)
         template_values = {
-                'group_name': group_name,
-                'query_params': urllib.urlencode({'group_name':group_name.encode('utf8')}),
+                'errors': '',
         }
-        template = JINJA_ENVIRONMENT.get_template('templates/index.html')
-        self.response.write(template.render(template_values))
-
-
-class Results(webapp2.RequestHandler):
+                #'group_name': group_name,
+                #'query_params': urllib.urlencode({'group_name':group_name.encode('utf8')}),
+        self.write_form(template_values)
 
     def post(self):
-        if DEBUG: print 'made it to Results'
-        group_name = self.request.get('group_name')
-        if DEBUG: print 'group name is ', group_name
         name_list = []
         title = self.request.get("title")
         for i in range(1,11):
@@ -59,14 +58,46 @@ class Results(webapp2.RequestHandler):
                 if DEBUG: print(self.request.get(name), self.request.get(email))
                 name_list.append((self.request.get(name), self.request.get(email)))
 
-        name_selector = ChristmasNamesSelector(name_list, 1)
-        matches = name_selector.pair_names()
-        if DEBUG: name_selector.print_pairs(matches)
-        emailer = EmailFolks()
-        for match in matches:
-            emailer.format_email(match)
+        if DEBUG: print 'made it to post'
+        group_name = self.request.get('group_name')
+        if DEBUG: print 'group name is ', group_name
 
-        self.redirect('/thanks')
+        errors = self.validate(name_list)
+        if errors != '':
+            errors += "Please try again."
+            if DEBUG: print 'errors present: ',errors
+        #TODO: finish below
+            template_values = {
+                    'errors': errors,
+            } #finish
+            self.write_form(template_values)
+        else:
+            name_selector = ChristmasNamesSelector(name_list, 1)
+            matches = name_selector.pair_names()
+            if DEBUG: name_selector.print_pairs(matches)
+            emailer = EmailFolks()
+            for match in matches:
+                emailer.format_email(match)
+
+            self.redirect('/thanks')
+
+    def validate(self, name_list):
+        names = [x[0] for x in name_list]
+        errors = ''
+        email_regex = re.compile(r"^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$")
+        if len(names) != len(set(names)):
+            errors += "No duplicate names allowed.\n\n"
+        for x in name_list:
+            if x[1] == u'':
+                errors += "Every name must have an associated email.\n\n"
+            else:
+                if not email_regex.match(x[1]):
+                    errors += "Please enter a valid email. You entered %s.\n" % (x[1])
+        if DEBUG: print errors
+        return errors
+#check email format
+#verify no duplicate names
+#all names have emails
 
 
 class Thanks(webapp2.RequestHandler):
@@ -80,6 +111,5 @@ class Thanks(webapp2.RequestHandler):
 
 
 app = webapp2.WSGIApplication([('/', EntryPage),
-                                ('/assigned', Results),
                                 ('/thanks', Thanks)],
                                 debug=True)
