@@ -90,8 +90,3 @@ class ChristmasNamesSelector(object):
         for pair in giver_receiver_pairs:
             print pair.giver + " : " + repr(pair.receiver) + ', email: ' + pair.giver_email + '\n'
         return
-
-name_list = [('a','a@g.c'), ('b','b@g.co'), ('c', 'c@j.c'), ('d', 'd@gj.c')]
-selector = ChristmasNamesSelector(name_list, 1)
-matches = selector.pair_names()
-selector.print_pairs(matches)

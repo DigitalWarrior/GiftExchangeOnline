@@ -22,6 +22,8 @@ class GiverReceiver(ndb.Model):
     receiver = ndb.StringProperty()  # note: single receiver (for now)
     email = ndb.StringProperty()
     group = ndb.StringProperty()
+#TODO: I think this class is currently unnecessary b/c not adding/
+#retrieving from database now
 
 
 class EntryPage(webapp2.RequestHandler):
@@ -41,19 +43,18 @@ class EntryPage(webapp2.RequestHandler):
         template_values = {
                 'errors': '',
         }
-                #'group_name': group_name,
-                #'query_params': urllib.urlencode({'group_name':group_name.encode('utf8')}),
         self.write_form(template_values)
 
     def post(self):
+        '''If page is accessed from a post request, parse form data,
+            validate it. Run shuffle and email code if data is valid,
+            else, return to form page with an error.
+        '''
         name_list = []
         title = self.request.get("title")
         for i in range(1,11):
             name = "name"+str(i)
             email = "email"+str(i)
-            #if name is not u'' and email is u'':
-                #give an error about filling in email and go back
-                #pass
             if self.request.get(name) is not u'':
                 if DEBUG: print(self.request.get(name), self.request.get(email))
                 name_list.append((self.request.get(name), self.request.get(email)))
@@ -66,10 +67,9 @@ class EntryPage(webapp2.RequestHandler):
         if errors != '':
             errors += "Please try again."
             if DEBUG: print 'errors present: ',errors
-        #TODO: finish below
             template_values = {
                     'errors': errors,
-            } #finish
+            }
             self.write_form(template_values)
         else:
             name_selector = ChristmasNamesSelector(name_list, 1)
@@ -82,6 +82,9 @@ class EntryPage(webapp2.RequestHandler):
             self.redirect('/thanks')
 
     def validate(self, name_list):
+        '''Validate user input on form. Check email format, verify
+            no duplicate names, verify all names have emails.
+        '''
         names = [x[0] for x in name_list]
         errors = ''
         email_regex = re.compile(r"^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$")
@@ -95,9 +98,6 @@ class EntryPage(webapp2.RequestHandler):
                     errors += "Please enter a valid email. You entered %s.\n" % (x[1])
         if DEBUG: print errors
         return errors
-#check email format
-#verify no duplicate names
-#all names have emails
 
 
 class Thanks(webapp2.RequestHandler):
@@ -112,4 +112,4 @@ class Thanks(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([('/', EntryPage),
                                 ('/thanks', Thanks)],
-                                debug=False)
+                                debug=DEBUG)
